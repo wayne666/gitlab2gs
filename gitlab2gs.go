@@ -47,24 +47,24 @@ func main() {
 	config := loadConfig(*configFile)
 
 	//judge config file args is legal or not
-	isLegalConfigArg(&config)
+	isLegalConfigArg(config)
 
 	gitlab = gogitlab.NewGitlab(config.GitlabHost, config.GitlabApiPath, config.GitlabToken)
 	gs = gogs.NewClient(config.GogsUrl, config.GogsToken)
 
 	migrateProjects := getProjects(config.GitlabProjects)
 	for _, project := range migrateProjects {
-		doMigrate(project, &config)
+		doMigrate(project, config)
 	}
 }
 
-func loadConfig(configfile string) Config {
+func loadConfig(configfile string) *Config {
 	file, err := ioutil.ReadFile(*configFile)
 	checkErr("Config file error", err)
 
 	var config Config
 	json.Unmarshal(file, &config)
-	return config
+	return &config
 }
 
 func isLegalConfigArg(config *Config) {
