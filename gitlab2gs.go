@@ -70,12 +70,10 @@ func loadConfig(configfile string) *Config {
 func isLegalConfigArg(config *Config) {
 	if config.GogsUrl == "" || config.GogsToken == "" || config.GitlabHost == "" ||
 		config.GitlabToken == "" || config.GogsApiPath == "" || config.GitlabApiPath == "" {
-		usageAndExit("json config file field error, please check your config file")
+		usageAndExit("JSON config file field error, please check your config file")
 	}
-
 }
 
-// get all migrate projects
 func getProjects(projects []string) []*gogitlab.Project {
 	if len(projects) != 0 {
 		var projectss []*gogitlab.Project
