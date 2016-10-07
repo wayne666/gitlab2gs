@@ -44,11 +44,7 @@ func main() {
 		usageAndExit("Please specify your json config file")
 	}
 
-	file, err := ioutil.ReadFile(*configFile)
-	checkErr("Config file error", err)
-
-	var config Config
-	json.Unmarshal(file, &config)
+	config := loadConfig(*configFile)
 
 	//judge config file args is legal or not
 	isLegalConfigArg(&config)
@@ -60,6 +56,15 @@ func main() {
 	for _, project := range migrateProjects {
 		doMigrate(project, &config)
 	}
+}
+
+func loadConfig(configfile string) Config {
+	file, err := ioutil.ReadFile(*configFile)
+	checkErr("Config file error", err)
+
+	var config Config
+	json.Unmarshal(file, &config)
+	return config
 }
 
 func isLegalConfigArg(config *Config) {
