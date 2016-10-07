@@ -28,7 +28,7 @@ type Config struct {
 	GogsApiPath    string   `json:"gogsApiPath"`
 }
 
-var configFile = flag.String("conf", "./config.json", "json config file")
+var configFile = flag.String("config", "./config.json", "json config file")
 
 var userMap = make(map[string]*gogs.Organization)
 var gitlab *gogitlab.Gitlab
@@ -45,35 +45,35 @@ func main() {
 	}
 
 	file, err := ioutil.ReadFile(*configFile)
-	if err != nil {
-		fmt.Printf("Config file error: %v\n", err)
-		os.Exit(1)
-	}
+	checkErr("Config file error", err)
 
 	var config Config
 	json.Unmarshal(file, &config)
-	fmt.Printf("Results: %+v\n", config)
 
-	if config.GogsUrl == "" || config.GogsToken == "" || config.GitlabHost == "" ||
-		config.GitlabToken == "" || config.GogsApiPath == "" || config.GitlabApiPath == "" {
-		usageAndExit("json config file field error, please check your config file")
-	}
+	//judge config file args is legal or not
+	isLegalConfigArg(&config)
 
 	gitlab = gogitlab.NewGitlab(config.GitlabHost, config.GitlabApiPath, config.GitlabToken)
 	gs = gogs.NewClient(config.GogsUrl, config.GogsToken)
 
 	migrateProjects := getProjects(config.GitlabProjects)
-	fmt.Printf("projectsss: %+v\n", migrateProjects)
 	for _, project := range migrateProjects {
 		doMigrate(project, &config)
-		fmt.Printf("project %+v\n", project)
-		fmt.Printf("org name: %s\n", project.Namespace.Name)
 	}
 }
 
+func isLegalConfigArg(config *Config) {
+	if config.GogsUrl == "" || config.GogsToken == "" || config.GitlabHost == "" ||
+		config.GitlabToken == "" || config.GogsApiPath == "" || config.GitlabApiPath == "" {
+		usageAndExit("json config file field error, please check your config file")
+	}
+
+}
+
+// get all migrate projects
 func getProjects(projects []string) []*gogitlab.Project {
 	if len(projects) != 0 {
-		projectss := make([]*gogitlab.Project, 5)
+		var projectss []*gogitlab.Project
 		for _, projectID := range projects {
 			project, err := gitlab.Project(projectID)
 			checkErr("Get project from ID error", err)
@@ -93,9 +93,7 @@ func getGogsUID(name string) int {
 	if ok {
 		return int(org.ID)
 	}
-	fmt.Printf("name: %s\n", name)
 	orgUserName, err := gs.GetOrg(name)
-	fmt.Printf("orgUserName: %v\n", orgUserName)
 	if err == nil {
 		return int(orgUserName.ID)
 	}
@@ -107,19 +105,17 @@ func getGogsUID(name string) int {
 	org, err = gs.AdminCreateOrg("root", createOrg)
 	checkErr("Failed to create org", err)
 	userMap[name] = org
-	fmt.Printf("userMap: %+v\n", userMap)
 	return int(org.ID)
 }
 
 func doMigrate(project *gogitlab.Project, config *Config) {
-	t1, err := gs.GetRepo(project.Namespace.Name, project.Name)
-	fmt.Printf("t1: %+v\n", t1)
+	t, err := gs.GetRepo(project.Namespace.Name, project.Name)
+	fmt.Printf("t: %+v\n", t)
 
 	if err == nil {
-		fmt.Printf("%s#%s already exists\n", project.Namespace.Name, project.Name)
+		fmt.Printf("%s # %s already in your gogs\n", project.Namespace.Name, project.Name)
 	} else {
 		orgID := getGogsUID(project.Namespace.Name)
-		fmt.Printf("orgID: %d\n", orgID)
 
 		// api is reserved
 		var name string = ""
@@ -129,21 +125,21 @@ func doMigrate(project *gogitlab.Project, config *Config) {
 			name = project.Name
 		}
 
-		fmt.Printf("%s#%s migrating as $%s$...\n",
+		fmt.Printf("%s # %s migrating to gogs # %s #...\n",
 			project.Namespace.Name, project.Name, name)
 
-		//opts := gogs.MigrateRepoOption{
-		//	CloneAddr:    project.HttpRepoUrl,
-		//	AuthUsername: config.GitlabUser,
-		//	AuthPassword: config.GitlabPassword,
-		//	UID:          orgID,
-		//	RepoName:     name,
-		//	Private:      !project.Public,
-		//	Description:  project.Description,
-		//}
+		opts := gogs.MigrateRepoOption{
+			CloneAddr:    project.HttpRepoUrl,
+			AuthUsername: config.GitlabUser,
+			AuthPassword: config.GitlabPassword,
+			UID:          orgID,
+			RepoName:     name,
+			Private:      !project.Public,
+			Description:  project.Description,
+		}
 
-		//_, err := gs.MigrateRepo(opts)
-		//checkErr("", err)
+		_, err := gs.MigrateRepo(opts)
+		checkErr("", err)
 	}
 }
 
