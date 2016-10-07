@@ -38,5 +38,5 @@
 	Copyright (c) 2016 WayneZhou. This library is free software; you can redistribute it and/or modify it.
 
 ## Speical Thanks
-	
-	I have learnt a lot from [gitlab2gos](https://github.com/ewoutp/gitlab2gogs), Thanks to [ewoutp](https://github.com/ewoutp). I just add a field which is spcified projects you want.
+
+I have learnt a lot from [gitlab2gos](https://github.com/ewoutp/gitlab2gogs), Thanks to [ewoutp](https://github.com/ewoutp). I just add a field which can spcify projects you want to migrate.
