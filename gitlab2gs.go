@@ -28,7 +28,7 @@ type Config struct {
 	GogsApiPath    string   `json:"gogsApiPath"`
 }
 
-var configFile = flag.String("config", "./config.json", "json config file")
+var configFile = flag.String("config", "./config.json.sample", "json config file")
 
 var userMap = make(map[string]*gogs.Organization)
 var gitlab *gogitlab.Gitlab
