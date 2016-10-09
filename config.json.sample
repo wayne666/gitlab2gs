@@ -2,7 +2,7 @@
   "gitlabHost":     "https://gitlab.com",
   "gitlabApiPath": "/api/v3",
   "gitlabUser": "username",
-  "gitlabPassword": "passwrod",
+  "gitlabPassword": "password",
   "gitlabToken":    "xxxxx",
   "gitlabProjects": ["project1", "project2"],
   "gogsUrl": "gogs host url",
