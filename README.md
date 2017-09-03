@@ -8,7 +8,7 @@
 
 ## Installation
 
-	$ go get github.com/WayneZhouChina/gitlab2gs
+	$ go get github.com/wayne666/gitlab2gs
 
 ## Usage
 
